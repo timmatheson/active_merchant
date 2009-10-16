@@ -6,7 +6,7 @@ class AuthorizeNetTest < Test::Unit::TestCase
       :login => 'X',
       :password => 'Y'
     )
-    @amount = 100
+    @amount = 0
     @credit_card = credit_card
     @subscription_id = '100748'
   end
@@ -209,6 +209,14 @@ class AuthorizeNetTest < Test::Unit::TestCase
   def test_expdate_formatting
     assert_equal '2009-09', @gateway.send(:arb_expdate, credit_card('4111111111111111', :month => "9", :year => "2009"))
     assert_equal '2013-11', @gateway.send(:arb_expdate, credit_card('4111111111111111', :month => "11", :year => "2013"))
+  end
+
+  def test_echeck
+    check = Check.new(:routing_number => "111000025", :account_number => "123456789012")
+    response = @gateway.send(:echeck, 100, check)
+    assert_instance_of Response, response
+    assert response.success?
+    assert response.test?
   end
 
   private

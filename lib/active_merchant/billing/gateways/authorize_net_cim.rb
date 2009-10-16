@@ -70,8 +70,12 @@ module ActiveMerchant #:nodoc:
       }
       
       ECHECK_TYPES = {
+        :arc => 'ARC',
+        :boc => 'BOC',
         :ccd => 'CCD',
-        :ppd => 'PPD'
+        :ppd => 'PPD',
+        :tel => 'TEL',
+        :web => 'WEB'
       }
       
       self.homepage_url = 'http://www.authorize.net/'

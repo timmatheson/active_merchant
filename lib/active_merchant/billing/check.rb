@@ -4,12 +4,18 @@ module ActiveMerchant #:nodoc:
     # of necessary attributes such as checkholder's name, routing and account numbers, but it is
     # not backed by any database.
     # 
-    # You may use Check in place of CreditCard with any gateway that supports it. Currently, only
-    # +BrainTreeGateway+ supports the Check object.
+    # You may use Check in place of CreditCard with any gateway that supports it. 
+    # Currently the following gateways support the check object.
+    # +BrainTreeGateway+ 
+    # +Authorize.net (AIM)+
+    
     class Check
       include Validateable
       
       attr_accessor :first_name, :last_name, :routing_number, :account_number, :account_holder_type, :account_type, :number
+      
+      # Required for eCheck.net 
+      attr_accessor :account_name, :bank_name, :bank_account_name, :echeck_type
       
       # Used for Canadian bank accounts
       attr_accessor :institution_number, :transit_number
@@ -28,9 +34,11 @@ module ActiveMerchant #:nodoc:
       end
       
       def validate
-        [:name, :routing_number, :account_number].each do |attr|
+        [:name, :routing_number, :account_number, :account_name, :echeck_type].each do |attr|
           errors.add(attr, "cannot be empty") if self.send(attr).blank?
         end
+        
+        errors.add(:echeck_type, "is invalid") unless valid_echeck_type?
         
         errors.add(:routing_number, "is invalid") unless valid_routing_number?
         
@@ -43,6 +51,10 @@ module ActiveMerchant #:nodoc:
       
       def type
         'check'
+      end
+      
+      def valid_echeck_type?
+        AuthorizeNetCimGateway::ECHECK_TYPES.values.include?(echeck_type)
       end
       
       # Routing numbers may be validated by calculating a checksum and dividing it by 10. The

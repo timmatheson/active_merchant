@@ -32,7 +32,9 @@ class CheckTest < Test::Unit::TestCase
                   :routing_number => VALID_ABA,
                   :account_number => ACCOUNT_NUMBER,
                   :account_holder_type => 'personal',
-                  :account_type => 'checking')
+                  :account_type => 'checking',
+                  :account_name => 'Rick James',
+                  :echeck_type => 'PPD')
     assert c.valid?
   end
   
@@ -84,5 +86,31 @@ class CheckTest < Test::Unit::TestCase
     c.account_type = nil
     c.valid?
     assert !c.errors.on(:account_type)
+  end
+  
+  def test_account_name
+    c = Check.new
+    c.account_name = 'Rick James'
+    c.valid?
+    assert !c.errors.on(:account_name)
+    c.account_name = nil
+    c.valid?
+    assert c.errors.on(:account_name)
+    c.account_name = ""
+    c.valid?
+    assert c.errors.on(:account_name)
+  end
+  
+  def test_echeck_type
+    c = Check.new
+    AuthorizeNetCimGateway::ECHECK_TYPES.map do |name, value|
+      c.echeck_type = value
+      c.valid?
+      assert !c.errors.on(:echeck_type)
+    end
+    c.echeck_type = 'moo'
+    c.valid?
+    assert c.errors.on(:echeck_type)
+    assert_equal c.errors.on(:echeck_type), "is invalid"
   end
 end
